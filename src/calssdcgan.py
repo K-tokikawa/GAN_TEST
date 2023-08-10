@@ -42,7 +42,8 @@ class class_dcgan:
         os.mkdir('.\\image\\{:d}'.format(self.num_attenmps))
 
         train_images = (data - 127.5) / 127.5
-        self.train_dataset = tf.data.Dataset.from_tensor_slices(train_images).shuffle(self.BUFFER_SIZE).batch(self.BATCH_SIZE)
+        with tf.device('/cpu:0'):
+            self.train_dataset = tf.data.Dataset.from_tensor_slices(train_images).shuffle(self.BUFFER_SIZE).batch(self.BATCH_SIZE)
 
         self.generator = self.__make_generator_model()
         noise = np.random.uniform(-1, 1, (1, self.noise_dim))
@@ -83,7 +84,8 @@ class class_dcgan:
                                          padding='same', use_bias=False, activation="relu"))
         model.add(layers.BatchNormalization(momentum=0.8))
         print(model.output_shape)
-        assert model.output_shape == (None, 16, 16, 32)
+        assert model.output_shape == (
+            None, self.input_shape[0], self.input_shape[1], 32)
         # model.add(layers.Conv2DTranspose(8, (5, 5), strides=(2, 2),
         #                                  padding='same', use_bias=False, activation="relu"))
         # model.add(layers.BatchNormalization(momentum=0.8))
